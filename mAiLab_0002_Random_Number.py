@@ -32,6 +32,45 @@ for i in N:
 
 # 4. Self-made Random Number Generator
 
+# MT19937
+# https://en.wikipedia.org/wiki/Mersenne_Twister
+# An Python Implementation followed by Pseudocode on Wikipedia
+
+class RNG:
+    def __init__(self, seed=0):
+        self.index = 0
+        self.mt = [0] * 624
+        self.mt[0] = seed
+        for i in range(1, 624):
+            self.mt[i] = 0xFFFFFFFF & (1812433253 * (self.mt[i - 1] ^ (self.mt[i - 1] >> 30)) +
+                    i)
+
+    def extract_number(self):
+        if self.index == 0:
+            self.generate_numbers()
+
+        y = self.mt[self.index]
+        y = y ^ (y >> 11)
+        y = y ^ ((y << 7) & 2636928640)
+        y = y ^ ((y << 15) & 4022730752)
+        y = y ^ (y >> 18)
+
+        self.index = (self.index + 1) % 624
+        return y
+    
+    def generate_numbers(self):
+        for i in range(0, 624):
+            y = (self.mt[i] & 0x80000000) + (self.mt[(i + 1) % 624] & 0x7fffffff)
+            self.mt[i] = self.mt[(i + 397) % 624] ^ (y >> 1)
+            if y % 2 != 0:
+                self.mt[i] = self.mt[i] ^ 2567483615
+
+    def random(self):
+        return self.extract_number() / 0xFFFFFFFF
+
+rng = RNG()
+print(rng.random())
+
 # Result
 '''
 [0.27209326996202254, 0.05146406301581197, 0.3601347480734888, 0.5186212302047445, 0.20193117345395162]
